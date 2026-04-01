@@ -2,6 +2,23 @@
 
 Custom scripts and plasmoids for the Framework Laptop 16 (AMD Ryzen AI 9 HX 370) running CachyOS with KDE Plasma 6 on Wayland. Designed for dual-GPU setups with an NVIDIA RTX 5070 Mobile (dGPU) and AMD Radeon 890M (iGPU). Vibe coded with Claude Opus 4.6 1M.
 
+## Hardware assumptions
+
+These scripts are written for a specific hardware configuration and contain hardcoded values you may need to adjust for your setup:
+
+| Value | Used in | What it is |
+|---|---|---|
+| `0000:c1:00.0` | gpu-select, plasmalogin-gpu-env, sddm-kwin-wrapper, gpu-dock-env.sh | NVIDIA dGPU PCI address |
+| `0000:c2:00.0` | power-tune, plasmalogin-gpu-env, sddm-kwin-wrapper, gpu-dock-env.sh | AMD iGPU PCI address |
+| `card2-eDP-2` | power-tune | AMD iGPU sysfs panel path |
+| `eDP-2` | power-profile-hook.sh | Internal display KScreen output name |
+| `DP-1` | power-profile-hook.sh | External display KScreen output name |
+| `2560x1600` | power-profile-hook.sh | Internal panel resolution |
+| `wlan0` | power-tune | WiFi interface name |
+| `BAT1` | batterywatts plasmoid | Battery sysfs name |
+
+Run `lspci`, `kscreen-doctor -o`, `ip link`, and `ls /sys/class/power_supply/` to find the correct values for your machine.
+
 ## Scripts
 
 ### power-profile-hook.sh
