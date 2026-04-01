@@ -28,6 +28,7 @@ case "$PROFILE" in
         sudo power-tune aspm performance
         fw-fanctrl use performance
         sudo ryzenadj --tctl-temp=100 --set-coall=0xFFFE7 2>/dev/null
+        sudo scxctl switch --sched bpfland --mode gaming 2>/dev/null
         ;;
 
     balanced)
@@ -36,6 +37,7 @@ case "$PROFILE" in
         sudo power-tune aspm performance
         fw-fanctrl use balanced
         sudo ryzenadj --stapm-limit=35000 --fast-limit=45000 --slow-limit=35000 --tctl-temp=85 --set-coall=0xFFFE2 2>/dev/null
+        sudo scxctl switch --sched bpfland --mode gaming 2>/dev/null
         ;;
 
     power-saver)
@@ -44,5 +46,6 @@ case "$PROFILE" in
         sudo power-tune aspm powersave
         fw-fanctrl use power-saver
         sudo ryzenadj --stapm-limit=15000 --fast-limit=20000 --slow-limit=15000 --tctl-temp=75 --set-coall=0xFFFDD 2>/dev/null
+        sudo scxctl switch --sched bpfland --mode powersave 2>/dev/null
         ;;
 esac
