@@ -1,6 +1,6 @@
 # Framework Laptop 16 CachyOS Utilities
 
-Custom scripts and plasmoids for the Framework Laptop 16 (AMD Ryzen AI 9 HX 370) running CachyOS with KDE Plasma 6 on Wayland. Designed for dual-GPU setups with an NVIDIA RTX 5070 Mobile (dGPU) and AMD Radeon 890M (iGPU).
+Custom scripts and plasmoids for the Framework Laptop 16 (AMD Ryzen AI 9 HX 370) running CachyOS with KDE Plasma 6 on Wayland. Designed for dual-GPU setups with an NVIDIA RTX 5070 Mobile (dGPU) and AMD Radeon 890M (iGPU). Vibe coded with Claude Opus 4.6 1M.
 
 ## Scripts
 
@@ -8,37 +8,37 @@ Custom scripts and plasmoids for the Framework Laptop 16 (AMD Ryzen AI 9 HX 370)
 
 Adjusts system settings when KDE's power profile changes (performance/balanced/power-saver). Controls display refresh rate, WiFi power save, PCIe ASPM policy, AMD panel power savings, fan curves (via fw-fanctrl), and CPU power limits + undervolt (via ryzenadj).
 
-**Install:** `~/.local/bin/power-profile-hook.sh`
+**Install:** Symlink to `~/.local/bin/` — called automatically by `power-profile-monitor.sh` when the KDE power profile changes.
 
 ### power-profile-monitor.sh
 
 Monitors `power-profiles-daemon` over D-Bus and triggers `power-profile-hook.sh` when the active profile changes.
 
-**Install:** `~/.local/bin/power-profile-monitor.sh`
+**Install:** Symlink to `~/.local/bin/` and enable the accompanying systemd user service (`power-profile-monitor.service`) to run at login.
 
 ### power-tune
 
 Minimal root helper for writing to sysfs. Handles ASPM policy, AMD ABM panel power savings, WiFi power save, and Bluetooth rfkill. Called via passwordless sudo from the power profile hook.
 
-**Install:** `/usr/local/bin/power-tune` (requires sudoers entry)
+**Install:** Copy to `/usr/local/bin/` (root-owned). Requires a sudoers entry granting passwordless access, e.g. in `/etc/sudoers.d/power-hook`.
 
 ### gpu-select
 
 Switches the KDE compositor between the iGPU and dGPU. Saves the selection to a state file and logs out to apply. Useful when docking with an external display connected to the NVIDIA GPU module.
 
-**Install:** `~/.local/bin/gpu-select`
+**Install:** Symlink to `~/.local/bin/`. Works together with `gpu-dock-env.sh` which reads the saved state at session start.
 
 ### plasmalogin-gpu-env
 
 Detects if an external display is connected to the NVIDIA GPU at boot and writes `KWIN_DRM_DEVICES` to an env file for the plasma-login-manager greeter. Prevents greeter flickering on multi-GPU systems.
 
-**Install:** `/usr/local/bin/plasmalogin-gpu-env` (called via systemd drop-in)
+**Install:** Copy to `/usr/local/bin/` (root-owned). Called via the `plasmalogin-gpu.conf` systemd drop-in as an `ExecStartPre` hook on `plasmalogin.service`.
 
 ### sddm-kwin-wrapper
 
 Similar to `plasmalogin-gpu-env` but wraps SDDM's kwin_wayland compositor directly. Sets `KWIN_DRM_DEVICES` based on connected displays before exec-ing kwin.
 
-**Install:** `/usr/local/bin/sddm-kwin-wrapper`
+**Install:** Copy to `/usr/local/bin/` (root-owned). Only needed if using SDDM instead of plasma-login-manager.
 
 ## Environment Scripts
 
@@ -46,21 +46,21 @@ Similar to `plasmalogin-gpu-env` but wraps SDDM's kwin_wayland compositor direct
 
 Runs at Plasma session start. Reads the saved GPU mode (from `gpu-select`) and exports `KWIN_DRM_DEVICES` so KWin composites on the correct GPU. Resolves `by-path` symlinks to `/dev/dri/cardN` to avoid colon conflicts in the env var.
 
-**Install:** `~/.config/plasma-workspace/env/gpu-dock-env.sh`
+**Install:** Symlink to `~/.config/plasma-workspace/env/` — KDE sources all scripts in this directory at session start.
 
 ## Systemd Units
 
 ### power-profile-monitor.service
 
-User service that runs `power-profile-monitor.sh` at login.
+User service that runs `power-profile-monitor.sh` at login. Watches D-Bus for power profile changes and triggers the hook script.
 
-**Install:** `~/.config/systemd/user/power-profile-monitor.service`
+**Install:** Symlink to `~/.config/systemd/user/` and enable with `systemctl --user enable --now power-profile-monitor.service`.
 
 ### plasmalogin-gpu.conf
 
 Systemd drop-in for `plasmalogin.service` that runs `plasmalogin-gpu-env` as `ExecStartPre` and passes the resulting env file via `EnvironmentFile`.
 
-**Install:** `/etc/systemd/system/plasmalogin.service.d/gpu.conf`
+**Install:** Copy to `/etc/systemd/system/plasmalogin.service.d/gpu.conf` (requires root). Run `systemctl daemon-reload` after installing.
 
 ## Plasmoids
 
@@ -75,7 +75,7 @@ System tray plasmoid for Framework's fw-fanctrl. Shows current fan percentage, l
 ## Installation
 
 ```sh
-git clone <this-repo> ~/Documents/Projects/framework-cachyos-utilities
+git clone https://github.com/liamsmith86/framework-cachyos-utilities.git ~/Documents/Projects/framework-cachyos-utilities
 
 # User scripts
 ln -sf ~/Documents/Projects/framework-cachyos-utilities/scripts/power-profile-hook.sh ~/.local/bin/
