@@ -26,7 +26,6 @@ case "$PROFILE" in
         set_laptop_hz 165
         sudo power-tune wifi off
         sudo power-tune aspm performance
-        sudo power-tune abm 0
         fw-fanctrl use performance
         sudo ryzenadj --tctl-temp=100 --set-coall=0xFFFE7 2>/dev/null
         ;;
@@ -35,7 +34,6 @@ case "$PROFILE" in
         set_laptop_hz 165
         sudo power-tune wifi off
         sudo power-tune aspm performance
-        sudo power-tune abm 0
         fw-fanctrl use balanced
         sudo ryzenadj --stapm-limit=35000 --fast-limit=45000 --slow-limit=35000 --tctl-temp=85 --set-coall=0xFFFE2 2>/dev/null
         ;;
@@ -44,7 +42,6 @@ case "$PROFILE" in
         set_laptop_hz 60
         sudo power-tune wifi on
         sudo power-tune aspm powersave
-        sudo power-tune abm 1
         fw-fanctrl use power-saver
         sudo ryzenadj --stapm-limit=15000 --fast-limit=20000 --slow-limit=15000 --tctl-temp=75 --set-coall=0xFFFDD 2>/dev/null
         ;;
