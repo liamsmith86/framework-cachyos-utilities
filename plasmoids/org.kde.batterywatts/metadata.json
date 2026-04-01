@@ -1,0 +1,19 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Id": "org.kde.batterywatts",
+        "Name": "Battery Watts",
+        "Description": "Shows battery power draw or charge rate in watts",
+        "Category": "System Information",
+        "EnabledByDefault": true,
+        "Authors": [
+            {
+                "Name": "Liam"
+            }
+        ],
+        "Icon": "battery",
+        "Version": "1.0",
+        "License": "GPL-3.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

@@ -1,0 +1,23 @@
+#!/bin/sh
+# Detect which GPU has a connected display and write KWIN_DRM_DEVICES
+# for plasmalogin's kwin compositor. Called as ExecStartPre.
+
+ENV_FILE="/run/plasmalogin-gpu.env"
+
+NVIDIA_DRI=$(readlink -f /dev/dri/by-path/pci-0000:c1:00.0-card 2>/dev/null)
+
+if [ -c "$NVIDIA_DRI" ]; then
+    NVIDIA_CARD=$(basename "$NVIDIA_DRI")
+    for conn in /sys/class/drm/"${NVIDIA_CARD}"-DP-*; do
+        if [ "$(cat "$conn/status" 2>/dev/null)" = "connected" ]; then
+            AMD_DRI=$(readlink -f /dev/dri/by-path/pci-0000:c2:00.0-card 2>/dev/null)
+            if [ -c "$AMD_DRI" ]; then
+                echo "KWIN_DRM_DEVICES=${NVIDIA_DRI}:${AMD_DRI}" > "$ENV_FILE"
+                exit 0
+            fi
+        fi
+    done
+fi
+
+# No external display or GPU unavailable — clear env file
+rm -f "$ENV_FILE"

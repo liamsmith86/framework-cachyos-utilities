@@ -1,0 +1,21 @@
+#!/bin/sh
+# Wrapper for SDDM's kwin_wayland compositor.
+# Detects which GPU has a connected display and sets KWIN_DRM_DEVICES
+# to avoid greeter flickering on multi-GPU systems.
+
+NVIDIA_CARD=$(basename "$(readlink -f /dev/dri/by-path/pci-0000:c1:00.0-card 2>/dev/null)" 2>/dev/null)
+
+if [ -n "$NVIDIA_CARD" ]; then
+    for conn in /sys/class/drm/"${NVIDIA_CARD}"-DP-*; do
+        if [ "$(cat "$conn/status" 2>/dev/null)" = "connected" ]; then
+            NVIDIA_DRI=$(readlink -f /dev/dri/by-path/pci-0000:c1:00.0-card 2>/dev/null)
+            AMD_DRI=$(readlink -f /dev/dri/by-path/pci-0000:c2:00.0-card 2>/dev/null)
+            if [ -c "$NVIDIA_DRI" ] && [ -c "$AMD_DRI" ]; then
+                export KWIN_DRM_DEVICES="${NVIDIA_DRI}:${AMD_DRI}"
+            fi
+            break
+        fi
+    done
+fi
+
+exec kwin_wayland "$@"

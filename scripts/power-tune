@@ -1,0 +1,12 @@
+#!/bin/bash
+case "$1" in
+    aspm)      echo "$2" > /sys/module/pcie_aspm/parameters/policy ;;
+    abm)       echo "$2" > /sys/devices/pci0000:00/0000:00:08.1/0000:c2:00.0/drm/card2/card2-eDP-2/amdgpu/panel_power_savings ;;
+    wifi)      /usr/bin/iw dev wlan0 set power_save "$2" ;;
+    bluetooth)
+        case "$2" in
+            off) /usr/bin/rfkill block bluetooth ;;
+            on)  /usr/bin/rfkill unblock bluetooth ;;
+        esac
+        ;;
+esac

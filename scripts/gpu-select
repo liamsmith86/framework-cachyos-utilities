@@ -1,0 +1,38 @@
+#!/bin/bash
+# gpu-select — Set compositor GPU and restart session
+# Usage: gpu-select [dgpu|igpu]
+
+set -euo pipefail
+
+MODE="${1:-}"
+STATE_FILE="$HOME/.config/gpu-dock-mode"
+
+case "$MODE" in
+    dgpu|igpu) ;;
+    status)
+        echo "mode=$(cat "$STATE_FILE" 2>/dev/null || echo "igpu")"
+        exit 0
+        ;;
+    *)
+        echo "Usage: gpu-select [dgpu|igpu|status]" >&2
+        exit 1
+        ;;
+esac
+
+# Verify the NVIDIA device is available before switching to dgpu
+if [[ "$MODE" == "dgpu" ]]; then
+    NVIDIA_DRI=$(readlink -f "/dev/dri/by-path/pci-0000:c1:00.0-card" 2>/dev/null)
+    if [[ ! -c "$NVIDIA_DRI" ]]; then
+        notify-send -u critical -t 4000 -a "GPU Select" \
+            "Cannot switch to dGPU" "NVIDIA device not available (D3cold?)" || true
+        exit 1
+    fi
+fi
+
+echo "$MODE" > "$STATE_FILE"
+
+notify-send -u critical -t 2000 -a "GPU Select" \
+    "Switching to $MODE" "Session restarting..." || true
+
+sleep 1
+qdbus6 org.kde.Shutdown /Shutdown logout
