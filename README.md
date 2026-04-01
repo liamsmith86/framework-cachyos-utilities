@@ -70,7 +70,7 @@ System tray plasmoid showing real-time battery discharge wattage, CPU temperatur
 
 ### org.kde.fwfanctrl
 
-System tray plasmoid for Framework's fw-fanctrl. Shows current fan percentage, lets you switch between fan curve profiles, and includes a GPU compositor tab for switching between iGPU/dGPU.
+System tray plasmoid for Framework's fw-fanctrl. Shows current fan percentage, lets you switch between fan curve profiles, and includes a GPU compositor tab for switching between iGPU/dGPU. Fork of [augiedoggie/FrameworkFanPlasmoid](https://github.com/augiedoggie/FrameworkFanPlasmoid) by Chris Roberts, licensed under MIT.
 
 ## Installation
 
