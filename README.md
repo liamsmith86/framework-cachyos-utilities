@@ -9,8 +9,7 @@ These scripts are written for a specific hardware configuration and contain hard
 | Value | Used in | What it is |
 |---|---|---|
 | `0000:c1:00.0` | gpu-select, plasmalogin-gpu-env, sddm-kwin-wrapper, gpu-dock-env.sh | NVIDIA dGPU PCI address |
-| `0000:c2:00.0` | power-tune, plasmalogin-gpu-env, sddm-kwin-wrapper, gpu-dock-env.sh | AMD iGPU PCI address |
-| `card2-eDP-2` | power-tune | AMD iGPU sysfs panel path |
+| `0000:c2:00.0` | plasmalogin-gpu-env, sddm-kwin-wrapper, gpu-dock-env.sh | AMD iGPU PCI address |
 | `eDP-2` | power-profile-hook.sh | Internal display KScreen output name |
 | `DP-1` | power-profile-hook.sh | External display KScreen output name |
 | `2560x1600` | power-profile-hook.sh | Internal panel resolution |
@@ -23,7 +22,7 @@ Run `lspci`, `kscreen-doctor -o`, `ip link`, and `ls /sys/class/power_supply/` t
 
 ### power-profile-hook.sh
 
-Adjusts system settings when KDE's power profile changes (performance/balanced/power-saver). Controls display refresh rate, WiFi power save, PCIe ASPM policy, AMD panel power savings, fan curves (via fw-fanctrl), and CPU power limits + undervolt (via ryzenadj).
+Adjusts system settings when KDE's power profile changes (performance/balanced/power-saver). Controls display refresh rate, WiFi power save, PCIe ASPM policy, fan curves (via fw-fanctrl), and CPU power limits + undervolt (via ryzenadj).
 
 **Install:** Symlink to `~/.local/bin/` — called automatically by `power-profile-monitor.sh` when the KDE power profile changes.
 
@@ -35,9 +34,9 @@ Monitors `power-profiles-daemon` over D-Bus and triggers `power-profile-hook.sh`
 
 ### power-tune
 
-Minimal root helper for writing to sysfs. Handles ASPM policy, AMD ABM panel power savings, WiFi power save, and Bluetooth rfkill. Called via passwordless sudo from the power profile hook.
+Minimal root helper for writing to sysfs. Handles ASPM policy, WiFi power save, and Bluetooth rfkill. Called via passwordless sudo from the power profile hook.
 
-**Install:** Copy to `/usr/local/bin/` (root-owned). Requires a sudoers entry granting passwordless access, e.g. in `/etc/sudoers.d/power-hook`.
+**Install:** Symlink to `/usr/local/bin/` (requires root). Requires a sudoers entry granting passwordless access, e.g. in `/etc/sudoers.d/power-hook`.
 
 ### gpu-select
 
@@ -111,7 +110,7 @@ ln -sf ~/Documents/Projects/framework-cachyos-utilities/systemd/power-profile-mo
 systemctl --user enable --now power-profile-monitor.service
 
 # System scripts (requires root)
-sudo cp scripts/power-tune /usr/local/bin/
+sudo ln -sf ~/Documents/Projects/framework-cachyos-utilities/scripts/power-tune /usr/local/bin/
 sudo cp scripts/plasmalogin-gpu-env /usr/local/bin/
 sudo cp scripts/sddm-kwin-wrapper /usr/local/bin/
 sudo mkdir -p /etc/systemd/system/plasmalogin.service.d
