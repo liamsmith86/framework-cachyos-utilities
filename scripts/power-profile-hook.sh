@@ -12,12 +12,14 @@ export QT_QPA_PLATFORM=wayland
 
 # Only change laptop panel refresh if it's enabled and no external monitor
 KSCREEN=$(kscreen-doctor -o 2>/dev/null | cat -v)
-EXTERNAL_CONNECTED=$(echo "$KSCREEN" | grep -c "DP-1" || true)
-LAPTOP_ENABLED=$(echo "$KSCREEN" | grep -A1 "eDP-2" | grep -c "enabled" || true)
+# Laptop panel is eDP-2 in iGPU mode, eDP-1 in dGPU mode
+LAPTOP_OUTPUT=$(echo "$KSCREEN" | grep -oP 'eDP-\d+' | head -1)
+EXTERNAL_CONNECTED=$(echo "$KSCREEN" | grep -cP '(?<!e)DP-\d+' || true)
+LAPTOP_ENABLED=$(echo "$KSCREEN" | grep -A1 "${LAPTOP_OUTPUT:-eDP-2}" | grep -c "enabled" || true)
 
 set_laptop_hz() {
-    if [ "$LAPTOP_ENABLED" -ge 1 ] && [ "$EXTERNAL_CONNECTED" -eq 0 ]; then
-        kscreen-doctor output.eDP-2.mode.2560x1600@"$1" 2>/dev/null
+    if [ -n "$LAPTOP_OUTPUT" ] && [ "$LAPTOP_ENABLED" -ge 1 ] && [ "$EXTERNAL_CONNECTED" -eq 0 ]; then
+        kscreen-doctor output."$LAPTOP_OUTPUT".mode.2560x1600@"$1" 2>/dev/null
     fi
 }
 
@@ -27,8 +29,8 @@ case "$PROFILE" in
         sudo power-tune wifi off
         sudo power-tune aspm performance
         fw-fanctrl use performance
-        sudo ryzenadj --tctl-temp=100 --set-coall=0xFFFE7 2>/dev/null
-        sudo scxctl switch --sched bpfland --mode gaming 2>/dev/null
+        timeout --kill-after=5 10 sudo ryzenadj --tctl-temp=100 --set-coall=0xFFFE7 2>/dev/null
+        timeout --kill-after=5 10 sudo scxctl switch --sched bpfland --mode gaming 2>/dev/null
         ;;
 
     balanced)
@@ -36,8 +38,8 @@ case "$PROFILE" in
         sudo power-tune wifi off
         sudo power-tune aspm performance
         fw-fanctrl use balanced
-        sudo ryzenadj --stapm-limit=35000 --fast-limit=45000 --slow-limit=35000 --tctl-temp=85 --set-coall=0xFFFE2 2>/dev/null
-        sudo scxctl switch --sched bpfland --mode gaming 2>/dev/null
+        timeout --kill-after=5 10 sudo ryzenadj --stapm-limit=35000 --fast-limit=45000 --slow-limit=35000 --tctl-temp=85 --set-coall=0xFFFE2 2>/dev/null
+        timeout --kill-after=5 10 sudo scxctl switch --sched bpfland --mode gaming 2>/dev/null
         ;;
 
     power-saver)
@@ -45,7 +47,7 @@ case "$PROFILE" in
         sudo power-tune wifi on
         sudo power-tune aspm powersave
         fw-fanctrl use power-saver
-        sudo ryzenadj --stapm-limit=15000 --fast-limit=20000 --slow-limit=15000 --tctl-temp=75 --set-coall=0xFFFDD 2>/dev/null
-        sudo scxctl switch --sched bpfland --mode powersave 2>/dev/null
+        timeout --kill-after=5 10 sudo ryzenadj --stapm-limit=15000 --fast-limit=20000 --slow-limit=15000 --tctl-temp=75 --set-coall=0xFFFDD 2>/dev/null
+        timeout --kill-after=5 10 sudo scxctl switch --sched bpfland --mode powersave 2>/dev/null
         ;;
 esac
